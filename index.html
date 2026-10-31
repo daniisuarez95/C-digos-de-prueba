@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Para ti 🌻</title>
+<meta name="description" content="Un pequeño juego para un día muy especial.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,500&family=Playfair+Display:ital,wght@0,500;1,400;1,600&family=Dancing+Script:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#fdf8ee;
+    --gold:#f4c430;
+    --gold-deep:#d99a06;
+    --blue:#2f7df6;
+    --red:#e5383b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    min-height:100vh;min-height:100dvh;
+    background:#0b1026;color:var(--ink);
+    font-family:"Cormorant Garamond",Georgia,serif;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- Pantallas ---------- */
+  .screen{
+    position:fixed;inset:0;
+    display:flex;flex-direction:column;align-items:center;
+    overflow-y:auto;-webkit-overflow-scrolling:touch;
+    padding:48px 16px 64px;
+    opacity:0;visibility:hidden;transform:scale(1.03);
+    transition:opacity .9s ease,transform .9s ease,visibility 0s linear .9s;
+  }
+  .screen.active{
+    opacity:1;visibility:visible;transform:none;
+    transition:opacity .9s ease,transform .9s ease,visibility 0s;
+  }
+  .inner{width:100%;max-width:620px;margin:auto 0;text-align:center}
+
+  /* Estrellas compartidas (hilo visual entre pantallas) */
+  .stars{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  .stars i{
+    position:absolute;width:2px;height:2px;border-radius:50%;background:#fff;
+    opacity:.6;animation:twinkle 3s ease-in-out infinite;
+  }
+  @keyframes twinkle{50%{opacity:.1}}
+
+  .eyebrow{letter-spacing:.35em;text-transform:uppercase;font-size:.78rem;opacity:.75}
+  .heart-line{font-size:1.3rem;margin:18px 0;opacity:.9}
+
+  .btn{
+    font:inherit;cursor:pointer;border:0;border-radius:999px;
+    padding:14px 30px;font-size:1.05rem;
+    background:var(--gold);color:#3b2600;font-weight:600;
+    box-shadow:0 8px 24px rgba(0,0,0,.25);
+    transition:transform .2s ease,box-shadow .2s ease;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(0,0,0,.3)}
+  .btn:active{transform:translateY(0)}
+
+  .field{
+    display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:18px;
+  }
+  .field input{
+    font:inherit;font-size:1.15rem;text-align:center;
+    flex:1 1 220px;max-width:320px;
+    padding:13px 18px;border-radius:999px;
+    border:2px solid rgba(255,255,255,.55);
+    background:rgba(255,255,255,.15);color:inherit;outline:none;
+  }
+  .field input::placeholder{color:inherit;opacity:.6}
+  .field input:focus{border-color:#fff;background:rgba(255,255,255,.25)}
+  .feedback{min-height:1.6em;margin-top:12px;font-size:1.05rem}
+  .shake{animation:shake .45s}
+  @keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+
+  /* ---------- 1. Píldoras ---------- */
+  #s1{
+    background:radial-gradient(ellipse at 50% 30%,#1c2a5e 0%,#0b1026 65%);
+    font-family:"Cinzel",Georgia,serif;
+  }
+  #s1 h1{font-weight:400;font-size:clamp(1.6rem,6vw,2.6rem);line-height:1.25;margin:14px 0 8px}
+  #s1 .sub{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:1.25rem;opacity:.85}
+  .pills{display:flex;gap:28px;justify-content:center;flex-wrap:wrap;margin:46px 0 20px}
+  .pill-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;transition:all .8s ease}
+  .pill{
+    width:150px;height:62px;border-radius:999px;border:0;cursor:pointer;position:relative;
+    transform:rotate(-18deg);transition:transform .3s ease,filter .3s ease;
+  }
+  .pill::after{ /* brillo */
+    content:"";position:absolute;left:18px;top:10px;width:60%;height:14px;border-radius:999px;
+    background:rgba(255,255,255,.45);filter:blur(2px);
+  }
+  .pill.blue{
+    background:linear-gradient(90deg,#1f5fd1 0 50%,#4e9bff 50% 100%);
+    box-shadow:0 0 28px rgba(78,155,255,.55),inset 0 -6px 10px rgba(0,0,0,.25);
+  }
+  .pill.red{
+    background:linear-gradient(90deg,#b81d24 0 50%,#ff5257 50% 100%);
+    box-shadow:0 0 28px rgba(255,82,87,.5),inset 0 -6px 10px rgba(0,0,0,.25);
+  }
+  .pill:hover{transform:rotate(-18deg) scale(1.08)}
+  .pill-label{font-size:.95rem;letter-spacing:.15em}
+  .pill-label.blue{color:#7fb6ff}
+  .pill-label.red{color:#ff8a8d}
+  .pill-wrap.gone{opacity:0;transform:translateY(40px) scale(.4);pointer-events:none;width:0;margin:0 -14px}
+  .pill.calling{animation:call 1.4s ease-in-out infinite}
+  @keyframes call{50%{transform:rotate(-18deg) scale(1.12);filter:brightness(1.25)}}
+  #redMsg{
+    font-family:"Cormorant Garamond",serif;font-size:1.5rem;font-style:italic;
+    min-height:2.2em;color:#ffb3b5;opacity:0;transition:opacity .6s ease
+  }
+  #redMsg.show{opacity:1}
+
+  /* ---------- 2. El 11 y el acertijo ---------- */
+  #s2{
+    background:linear-gradient(170deg,#0f3d8a 0%,#2f7df6 55%,#8cc4ff 100%);
+    font-family:"Cormorant Garamond",Georgia,serif;
+  }
+  .big-num{
+    font-family:"Playfair Display",serif;font-weight:500;
+    font-size:clamp(4.5rem,22vw,8rem);line-height:1;
+    text-shadow:0 6px 30px rgba(0,0,0,.25);
+  }
+  #s2 .msg{font-size:clamp(1.2rem,4.5vw,1.45rem);line-height:1.55;margin:22px 0 30px}
+  .riddle{
+    background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);
+    border-radius:22px;padding:26px 20px;
+    font-style:italic;font-size:clamp(1.05rem,3.9vw,1.32rem);line-height:1.6;
+    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  }
+  .riddle h2{font-style:normal;font-weight:600;letter-spacing:.25em;text-transform:uppercase;font-size:.85rem;margin-bottom:14px;opacity:.85}
+  .riddle .q{font-style:normal;font-weight:600;margin-top:12px}
+  #s2 .btn{background:#fff;color:#0f3d8a}
+  .reveal{display:none;margin-top:26px;animation:pop .8s ease both}
+  .reveal.show{display:block}
+  @keyframes pop{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:none}}
+  .code-chip{
+    display:inline-block;font-family:"Playfair Display",serif;
+    font-size:clamp(2.6rem,12vw,4rem);letter-spacing:.06em;
+    padding:6px 26px;border-radius:18px;background:rgba(255,255,255,.2);margin:10px 0 18px
+  }
+
+  /* ---------- 3. Imagen, 26 y código total ---------- */
+  #s3{
+    background:linear-gradient(165deg,#ffb703 0%,#fb8500 60%,#d65a00 100%);
+    font-family:"Playfair Display",Georgia,serif;color:#fffaf0;
+  }
+  .bouquet{width:min(300px,80vw);height:auto;margin:0 auto;display:block;filter:drop-shadow(0 14px 24px rgba(90,40,0,.35))}
+  .bouquet .head{transform-box:fill-box;transform-origin:center;animation:sway 4s ease-in-out infinite}
+  @keyframes sway{50%{transform:rotate(6deg)}}
+  #s3 .caption{font-style:italic;font-size:clamp(1.5rem,6vw,2.1rem);margin:18px 0 6px}
+  #s3 .num-label{font-size:1rem;letter-spacing:.3em;text-transform:uppercase;opacity:.85;margin-top:16px}
+  #s3 .big-num{color:#fff}
+  #s3 .hint{font-style:italic;opacity:.9;margin-top:18px;font-size:1.08rem}
+  #s3 .field input{font-family:"Playfair Display",serif;letter-spacing:.12em;border-color:rgba(255,255,255,.75)}
+  #s3 .btn{background:#4a2600;color:#ffd166}
+
+  /* ---------- Final ---------- */
+  #s4{
+    background:linear-gradient(180deg,#3a0d2e 0%,#7a1f4a 45%,#c9476c 100%);
+    font-family:"Dancing Script",cursive;
+  }
+  #s4 .inner{position:relative;z-index:2}
+  .letter{
+    background:#fffaf0;color:#5a2a1b;border-radius:6px;
+    padding:38px 26px 30px;position:relative;
+    box-shadow:0 24px 60px rgba(0,0,0,.4);
+    background-image:repeating-linear-gradient(transparent 0 37px,rgba(201,71,108,.12) 37px 38px);
+    transform-origin:top center;
+    animation:unfold 1.4s cubic-bezier(.2,.8,.2,1) both;
+  }
+  @keyframes unfold{from{opacity:0;transform:perspective(900px) rotateX(-75deg)}to{opacity:1;transform:none}}
+  .letter .seal{
+    position:absolute;top:-26px;left:50%;transform:translateX(-50%);
+    width:52px;height:52px;border-radius:50%;
+    background:radial-gradient(circle at 35% 35%,#e05a7c,#9c1f45);
+    display:grid;place-items:center;font-size:1.5rem;box-shadow:0 6px 14px rgba(0,0,0,.3)
+  }
+  .letter p{font-size:clamp(2rem,8vw,2.9rem);line-height:1.3;font-weight:700}
+  .letter .sign{font-size:1.5rem;margin-top:14px;text-align:right;font-weight:500}
+
+  .coupon{
+    margin:42px auto 0;max-width:520px;
+    background:linear-gradient(135deg,#fff3c4,#ffd166);
+    color:#5b3a00;border-radius:18px;padding:26px 22px;position:relative;
+    border:3px dashed #b07a00;box-shadow:0 18px 40px rgba(0,0,0,.35);
+    opacity:0;transform:translateY(30px);transition:all 1s ease;
+  }
+  .coupon.show{opacity:1;transform:none}
+  .coupon::before,.coupon::after{
+    content:"";position:absolute;top:50%;width:30px;height:30px;border-radius:50%;
+    background:#8e2a52;transform:translateY(-50%);
+  }
+  .coupon::before{left:-17px}.coupon::after{right:-17px}
+  .coupon .tag{font-family:"Cinzel",serif;letter-spacing:.3em;font-size:.8rem;text-transform:uppercase}
+  .coupon h3{font-size:clamp(2rem,8vw,2.6rem);margin:8px 0 6px;line-height:1.15}
+  .coupon .how{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:1.15rem;line-height:1.45}
+  .coupon .code{font-family:"Playfair Display",serif;font-size:.95rem;letter-spacing:.2em;margin-top:12px;opacity:.75}
+  .dl{margin-top:16px;font-family:"Cormorant Garamond",serif;font-size:1rem;background:#5b3a00;color:#ffd166}
+
+  .final-msg{
+    font-size:clamp(1.55rem,5.6vw,2rem);line-height:1.5;margin-top:42px;
+    opacity:0;transition:opacity 1.6s ease;text-shadow:0 2px 10px rgba(0,0,0,.25)
+  }
+  .final-msg.show{opacity:1}
+  .final-msg .end{display:block;font-size:1.25em;font-weight:700;margin-bottom:10px;color:#ffd166}
+
+  /* Lluvia de girasoles */
+  #rain{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden}
+  .sf{
+    position:absolute;top:-40px;line-height:1;user-select:none;
+    animation:fall linear forwards;will-change:transform;
+  }
+  @keyframes fall{
+    0%{transform:translate(0,0) rotate(0)}
+    25%{transform:translate(var(--dx),25vh) rotate(90deg)}
+    50%{transform:translate(calc(var(--dx)*-1),50vh) rotate(180deg)}
+    75%{transform:translate(var(--dx),75vh) rotate(270deg)}
+    100%{transform:translate(0,110vh) rotate(360deg)}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .sf,.pill.calling,.bouquet .head,.stars i{animation-duration:0s!important;animation-iteration-count:1!important}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ 1. PÍLDORAS ============ -->
+<section class="screen active" id="s1" aria-label="Elige una píldora">
+  <div class="stars" data-stars="60"></div>
+  <div class="inner">
+    <p class="eyebrow">Un juego solo para ti</p>
+    <h1>Hoy tienes que elegir</h1>
+    <p class="sub">Una de estas píldoras abre el camino… la otra, bueno, ya verás.</p>
+
+    <div class="pills">
+      <div class="pill-wrap" id="blueWrap">
+        <button class="pill blue" id="bluePill" aria-label="Píldora azul"></button>
+        <span class="pill-label blue">Píldora azul</span>
+      </div>
+      <div class="pill-wrap" id="redWrap">
+        <button class="pill red" id="redPill" aria-label="Píldora roja"></button>
+        <span class="pill-label red">Píldora roja</span>
+      </div>
+    </div>
+    <p id="redMsg" aria-live="polite"></p>
+  </div>
+</section>
+
+<!-- ============ 2. EL 11 Y EL ACERTIJO ============ -->
+<section class="screen" id="s2" aria-label="Primer número">
+  <div class="stars" data-stars="25"></div>
+  <div class="inner">
+    <p class="eyebrow">Primer número del código</p>
+    <div class="big-num">11</div>
+
+    <p class="msg">
+      Hoy es un día hermoso 🤩 ya que estás de cumpleaños. Hoy no es un día cualquiera:
+      hoy, hace unos 24 años, se dio a luz al ser más bello que pudo ver el planeta Tierra,
+      con encantos suficientes para derretir cualquier corazón, como el mío 💙
+    </p>
+
+    <div class="riddle">
+      <h2>Acertijo</h2>
+      <p>
+        Sigo la luz dorada de un campo de girasoles,<br>
+        buscando el mapa secreto dibujado en tus lunares.<br>
+        Me pierdo en la noche clara que habita en tu mirada,<br>
+        donde un brillo hermoso lo ilumina todo y no pide nada.<br>
+        El 11/11/2026 el tiempo se detiene a celebrar tu vida,<br>
+        pero este verso no busca la fecha, busca a la dueña elegida.
+      </p>
+      <p class="q">Dime, ¿quién es la dueña de esta historia y de mi alegría?</p>
+
+      <form class="field" id="riddleForm" autocomplete="off">
+        <input id="riddleInput" type="text" placeholder="Escribe tu respuesta" aria-label="Respuesta del acertijo">
+        <button class="btn" type="submit">Responder</button>
+      </form>
+      <p class="feedback" id="riddleFeedback" aria-live="polite"></p>
+    </div>
+
+    <div class="reveal" id="riddleReveal">
+      <p>¡Sí! Eres tú, Fernanda. Aquí tienes los siguientes números:</p>
+      <div class="code-chip">11 · 20</div><br>
+      <button class="btn" id="toS3">Seguir el camino 🌻</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3. IMAGEN Y CÓDIGO FINAL ============ -->
+<section class="screen" id="s3" aria-label="Último número">
+  <div class="inner">
+    <svg class="bouquet" viewBox="0 0 300 330" role="img" aria-label="Ramo de girasoles">
+      <defs>
+        <g id="petals">
+          <ellipse cx="0" cy="-38" rx="11" ry="24" />
+          <ellipse cx="0" cy="-38" rx="11" ry="24" transform="rotate(30)" />
+          <ellipse cx="0" cy="-38" rx="11" ry="24" transform="rotate(60)" />
+          <ellipse cx="0" cy="-38" rx="11" ry="24" transform="rotate(90)" />
+          <ellipse cx="0" cy="-38" rx="11" ry="24" transform="rotate(120)" />
+          <ellipse cx="0" cy="-38" rx="11" ry="24" transform="rotate(150)" />
+          <ellipse cx="0" cy="-38" rx="11" ry="24" transform="rotate(180)" />
+          <ellipse cx="0" cy="-38" rx="11" ry="24" transform="rotate(210)" />
+          <ellipse cx="0" cy="-38" rx="11" ry="24" transform="rotate(240)" />
+          <ellipse cx="0" cy="-38" rx="11" ry="24" transform="rotate(270)" />
+          <ellipse cx="0" cy="-38" rx="11" ry="24" transform="rotate(300)" />
+          <ellipse cx="0" cy="-38" rx="11" ry="24" transform="rotate(330)" />
+        </g>
+      </defs>
+      <!-- tallos -->
+      <path d="M150 300 C150 240 90 190 80 120" stroke="#3f7d20" stroke-width="7" fill="none" stroke-linecap="round"/>
+      <path d="M150 300 C150 220 150 160 150 95" stroke="#3f7d20" stroke-width="7" fill="none" stroke-linecap="round"/>
+      <path d="M150 300 C150 240 210 190 222 125" stroke="#3f7d20" stroke-width="7" fill="none" stroke-linecap="round"/>
+      <path d="M120 215 C95 205 85 185 88 170 C110 178 122 195 120 215Z" fill="#5a9e2f"/>
+      <path d="M182 220 C208 212 218 192 214 176 C192 184 180 200 182 220Z" fill="#5a9e2f"/>
+      <!-- girasoles -->
+      <g transform="translate(80 120) scale(.85)"><g class="head" style="animation-delay:0s">
+        <use href="#petals" fill="#ffd60a" stroke="#e8a200" stroke-width="1.5"/>
+        <circle r="24" fill="#6b3e12"/><circle r="17" fill="#4a2a0a"/>
+      </g></g>
+      <g transform="translate(150 92)"><g class="head" style="animation-delay:-1.3s">
+        <use href="#petals" fill="#ffe14d" stroke="#e8a200" stroke-width="1.5"/>
+        <circle r="25" fill="#6b3e12"/><circle r="18" fill="#4a2a0a"/>
+      </g></g>
+      <g transform="translate(222 125) scale(.8)"><g class="head" style="animation-delay:-2.6s">
+        <use href="#petals" fill="#ffd60a" stroke="#e8a200" stroke-width="1.5"/>
+        <circle r="24" fill="#6b3e12"/><circle r="17" fill="#4a2a0a"/>
+      </g></g>
+      <!-- lazo -->
+      <path d="M118 262 L182 262 L172 300 L128 300Z" fill="#c9476c"/>
+      <path d="M150 268 C125 250 112 275 132 282 C140 285 148 276 150 268 C152 276 160 285 168 282 C188 275 175 250 150 268Z" fill="#e05a7c"/>
+      <circle cx="150" cy="270" r="6" fill="#9c1f45"/>
+    </svg>
+
+    <p class="caption">Es para ti, tan única como tú.</p>
+
+    <p class="num-label">Último número</p>
+    <div class="big-num">26</div>
+
+    <p class="hint">Ahora une todos los números que encontraste en el camino…</p>
+    <form class="field" id="codeForm" autocomplete="off">
+      <input id="codeInput" type="text" inputmode="numeric" placeholder="__-__-__-__" aria-label="Código completo" maxlength="14">
+      <button class="btn" type="submit">Abrir</button>
+    </form>
+    <p class="feedback" id="codeFeedback" aria-live="polite"></p>
+  </div>
+</section>
+
+<!-- ============ FINAL ============ -->
+<section class="screen" id="s4" aria-label="Tu carta">
+  <div id="rain" aria-hidden="true"></div>
+  <div class="inner">
+    <div class="letter" id="letter">
+      <div class="seal">💌</div>
+      <p>Eres la más hermosa que he visto. Disfruta tu día especial.</p>
+      <p class="sign">🌻</p>
+    </div>
+
+    <div class="coupon" id="coupon">
+      <div class="tag">Cupón válido</div>
+      <h3>Válido para una cena romántica 🍷</h3>
+      <p class="how">Canjéalo enviando esta imagen a la persona que te envió este programa.</p>
+      <p class="code">11 · 11 · 20 · 26</p>
+      <button class="btn dl" id="dlCoupon">Guardar imagen del cupón</button>
+    </div>
+
+    <p class="final-msg" id="finalMsg">
+      <span class="end">Llegaste al final.</span>
+      Espero que en un día tan especial como el de hoy la vida te premie estando con tu familia,
+      con tus seres queridos, pasando un día perfecto lleno de muchos regalos y alegría.
+      Yo quiero celebrar tu día con este pequeño juego, ya que pienso en ti cada que tengo
+      una luz de tiempo, y no hay nada más bello que pensarte y sonreír mirando al cielo.
+    </p>
+  </div>
+</section>
+
+<script>
+(function(){
+  /* ---------- utilidades ---------- */
+  const $ = id => document.getElementById(id);
+  const norm = s => s.normalize("NFD").replace(/[̀-ͯ]/g,"").trim().toLowerCase();
+
+  function go(id){
+    document.querySelectorAll(".screen").forEach(s => s.classList.toggle("active", s.id === id));
+    const s = $(id); s.scrollTop = 0;
+  }
+  function shake(el){ el.classList.remove("shake"); void el.offsetWidth; el.classList.add("shake"); }
+
+  // estrellas
+  document.querySelectorAll("[data-stars]").forEach(box => {
+    const n = +box.dataset.stars;
+    for(let i=0;i<n;i++){
+      const st = document.createElement("i");
+      st.style.left = Math.random()*100+"%";
+      st.style.top = Math.random()*100+"%";
+      st.style.animationDelay = (Math.random()*3)+"s";
+      const sz = Math.random()<.2 ? 3 : 2;
+      st.style.width = st.style.height = sz+"px";
+      box.appendChild(st);
+    }
+  });
+
+  /* ---------- 1. píldoras ---------- */
+  $("redPill").addEventListener("click", () => {
+    $("redMsg").textContent = "¿En serio escogiste este color? 😭";
+    $("redMsg").classList.add("show");
+    setTimeout(() => {
+      $("redWrap").classList.add("gone");
+      $("bluePill").classList.add("calling");
+    }, 1300);
+  });
+  $("bluePill").addEventListener("click", () => go("s2"));
+
+  /* ---------- 2. acertijo ---------- */
+  $("riddleForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const inp = $("riddleInput"), fb = $("riddleFeedback");
+    if(norm(inp.value) === "fernanda"){
+      fb.textContent = "💙";
+      inp.disabled = true;
+      $("riddleReveal").classList.add("show");
+      setTimeout(() => $("riddleReveal").scrollIntoView({behavior:"smooth",block:"center"}), 150);
+    } else {
+      fb.textContent = inp.value.trim() ? "Mmm… no es esa. Piensa en quién está leyendo esto 😉" : "Escribe tu respuesta 💙";
+      shake(inp);
+    }
+  });
+  $("toS3").addEventListener("click", () => go("s3"));
+
+  /* ---------- 3. código total ---------- */
+  const codeInput = $("codeInput");
+  codeInput.addEventListener("input", () => {
+    const d = codeInput.value.replace(/\D/g,"").slice(0,8);
+    codeInput.value = d.replace(/(\d{2})(?=\d)/g,"$1-");
+  });
+  $("codeForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const fb = $("codeFeedback");
+    if(codeInput.value.replace(/\D/g,"") === "11112026"){
+      fb.textContent = "🌻";
+      setTimeout(startFinal, 400);
+    } else {
+      fb.textContent = "Casi… recuerda el orden en que encontraste los números.";
+      shake(codeInput);
+    }
+  });
+
+  /* ---------- final ---------- */
+  let rainTimer = null;
+  function startFinal(){
+    go("s4");
+    setTimeout(() => $("coupon").classList.add("show"), 1800);
+    setTimeout(() => $("finalMsg").classList.add("show"), 3000);
+    startRain();
+  }
+  function spawn(){
+    const rain = $("rain");
+    const f = document.createElement("span");
+    f.className = "sf";
+    f.textContent = "🌻";
+    const size = 12 + Math.random()*14;         // pequeños
+    const dur  = 6 + Math.random()*6;
+    f.style.left = Math.random()*100 + "vw";
+    f.style.fontSize = size + "px";
+    f.style.opacity = (.75 + Math.random()*.25).toFixed(2);
+    f.style.setProperty("--dx", (15 + Math.random()*35) + "px");
+    f.style.animationDuration = dur + "s";
+    rain.appendChild(f);
+    setTimeout(() => f.remove(), dur*1000 + 200);
+  }
+  function startRain(){
+    for(let i=0;i<40;i++) setTimeout(spawn, i*60);      // estallido inicial
+    if(!rainTimer) rainTimer = setInterval(spawn, 260); // lluvia continua
+  }
+
+  /* ---------- descargar cupón como imagen ---------- */
+  $("dlCoupon").addEventListener("click", async () => {
+    const W = 1080, H = 640, c = document.createElement("canvas");
+    c.width = W; c.height = H;
+    const x = c.getContext("2d");
+    try { await document.fonts.ready; } catch(_){}
+    const g = x.createLinearGradient(0,0,W,H);
+    g.addColorStop(0,"#fff3c4"); g.addColorStop(1,"#ffd166");
+    x.fillStyle = "#8e2a52"; x.fillRect(0,0,W,H);
+    roundRect(x,30,30,W-60,H-60,36); x.fillStyle = g; x.fill();
+    x.setLineDash([18,12]); x.lineWidth = 5; x.strokeStyle = "#b07a00";
+    roundRect(x,55,55,W-110,H-110,26); x.stroke(); x.setLineDash([]);
+    x.fillStyle = "#8e2a52";
+    x.beginPath(); x.arc(30,H/2,34,0,Math.PI*2); x.arc(W-30,H/2,34,0,Math.PI*2); x.fill();
+    x.fillStyle = "#5b3a00"; x.textAlign = "center";
+    x.font = '600 30px "Cinzel", serif'; x.fillText("C U P Ó N   V Á L I D O", W/2, 150);
+    x.font = '700 76px "Dancing Script", cursive'; x.fillText("Válido para una", W/2, 260);
+    x.fillText("cena romántica 🍷", W/2, 345);
+    x.font = 'italic 34px "Cormorant Garamond", serif';
+    x.fillText("Canjéalo enviando esta imagen a la persona", W/2, 430);
+    x.fillText("que te envió este programa.", W/2, 472);
+    x.font = '28px "Playfair Display", serif'; x.fillText("🌻  11 · 11 · 20 · 26  🌻", W/2, 550);
+    const a = document.createElement("a");
+    a.download = "cupon-cena-romantica.png";
+    a.href = c.toDataURL("image/png");
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+  function roundRect(x,l,t,w,h,r){
+    x.beginPath(); x.moveTo(l+r,t); x.arcTo(l+w,t,l+w,t+h,r); x.arcTo(l+w,t+h,l,t+h,r);
+    x.arcTo(l,t+h,l,t,r); x.arcTo(l,t,l+w,t,r); x.closePath();
+  }
+})();
+</script>
+</body>
+</html>
