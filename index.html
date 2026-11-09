@@ -24,6 +24,8 @@
     font-family:"Cormorant Garamond",Georgia,serif;
     overflow-x:hidden;
     -webkit-font-smoothing:antialiased;
+    -webkit-text-size-adjust:100%;text-size-adjust:100%;
+    -webkit-tap-highlight-color:transparent;
   }
 
   /* ---------- Pantallas ---------- */
@@ -31,7 +33,9 @@
     position:fixed;inset:0;
     display:flex;flex-direction:column;align-items:center;
     overflow-y:auto;-webkit-overflow-scrolling:touch;
-    padding:48px 16px 64px;
+    padding-block:calc(48px + env(safe-area-inset-top,0px)) calc(64px + env(safe-area-inset-bottom,0px));
+    padding-left:max(16px,env(safe-area-inset-left,0px));
+    padding-right:max(16px,env(safe-area-inset-right,0px));
     opacity:0;visibility:hidden;transform:scale(1.03);
     transition:opacity .9s ease,transform .9s ease,visibility 0s linear .9s;
   }
@@ -210,6 +214,19 @@
   .final-msg.show{opacity:1}
   .final-msg .end{display:block;font-size:1.25em;font-weight:700;margin-bottom:10px;color:#ffd166}
 
+  /* Ventana con la imagen del cupón */
+  #saveBox{
+    position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;
+    background:rgba(30,6,20,.88);
+    padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
+  }
+  #saveBox[hidden]{display:none}
+  #saveBox .box{max-width:560px;width:100%;text-align:center;font-family:"Cormorant Garamond",serif;color:#fdf8ee}
+  #saveBox img{width:100%;border-radius:14px;box-shadow:0 18px 40px rgba(0,0,0,.5);-webkit-touch-callout:default;user-select:auto}
+  #saveBox p{font-size:1.2rem;font-style:italic;margin:16px 0}
+  #saveBox .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  #saveBox .row .btn{margin:0;text-decoration:none;display:inline-block}
+
   /* Lluvia de girasoles */
   #rain{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden}
   .sf{
@@ -380,6 +397,17 @@
   </div>
 </section>
 
+<div id="saveBox" hidden role="dialog" aria-label="Imagen del cupón">
+  <div class="box">
+    <img id="saveImg" alt="Cupón válido para una cena romántica">
+    <p>En el celular, mantén presionada la imagen y elige <b>«Guardar en Fotos»</b>.<br>Luego envíasela a quien te mandó este programa 💌</p>
+    <div class="row">
+      <a class="btn dl" id="saveLink" download="cupon-cena-romantica.png">Descargar</a>
+      <button class="btn" id="saveClose" type="button">Cerrar</button>
+    </div>
+  </div>
+</div>
+
 <script>
 (function(){
   /* ---------- utilidades ---------- */
@@ -501,11 +529,22 @@
     x.fillText("Canjéalo enviando esta imagen a la persona", W/2, 430);
     x.fillText("que te envió este programa.", W/2, 472);
     x.font = '28px "Playfair Display", serif'; x.fillText("🌻  11 · 11 · 20 · 26  🌻", W/2, 550);
-    const a = document.createElement("a");
-    a.download = "cupon-cena-romantica.png";
-    a.href = c.toDataURL("image/png");
-    document.body.appendChild(a); a.click(); a.remove();
+    const url = c.toDataURL("image/png");
+    // iPhone / Android: abre el menú de compartir (Guardar en Fotos, WhatsApp...)
+    try{
+      const blob = await new Promise(r => c.toBlob(r, "image/png"));
+      const file = new File([blob], "cupon-cena-romantica.png", {type:"image/png"});
+      if(navigator.canShare && navigator.canShare({files:[file]})){
+        await navigator.share({files:[file], title:"Cupón: cena romántica"});
+        return;
+      }
+    }catch(err){ if(err && err.name === "AbortError") return; }
+    // Si no se puede compartir: mostrar la imagen para guardarla a mano
+    $("saveImg").src = url;
+    $("saveLink").href = url;
+    $("saveBox").hidden = false;
   });
+  $("saveClose").addEventListener("click", () => { $("saveBox").hidden = true; });
   function roundRect(x,l,t,w,h,r){
     x.beginPath(); x.moveTo(l+r,t); x.arcTo(l+w,t,l+w,t+h,r); x.arcTo(l+w,t+h,l,t+h,r);
     x.arcTo(l,t+h,l,t,r); x.arcTo(l,t,l+w,t,r); x.closePath();
