@@ -2,6 +2,12 @@
 
 Un pequeño juego de cumpleaños. Todo está en `index.html`: no hay que instalar nada y funciona en cualquier navegador, en el celular o en la computadora.
 
+## 🔗 Link para abrir el juego
+
+**https://claude.ai/artifact/XuVSHZUAmkmkTbap9Nbh22**
+
+Se abre en cualquier navegador, también en el iPhone.
+
 ## Recorrido
 
 1. **Píldoras**: la azul abre el camino. La roja muestra un mensaje y luego desaparece.
