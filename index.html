@@ -214,6 +214,16 @@
   .final-msg.show{opacity:1}
   .final-msg .end{display:block;font-size:1.25em;font-weight:700;margin-bottom:10px;color:#ffd166}
 
+  /* ---------- Regalo expirado ---------- */
+  #sExp{
+    background:radial-gradient(ellipse at 50% 30%,#2a2440 0%,#0b1026 70%);
+    font-family:"Cormorant Garamond",Georgia,serif;
+  }
+  #sExp .clock{font-size:4.5rem;line-height:1;animation:tick 1.2s ease-in-out infinite}
+  @keyframes tick{50%{transform:rotate(-10deg)}}
+  #sExp h1{font-family:"Dancing Script",cursive;font-weight:700;font-size:clamp(2.4rem,10vw,3.4rem);margin:18px 0 10px;color:#ffd166}
+  #sExp p{font-size:clamp(1.15rem,4.5vw,1.35rem);font-style:italic;opacity:.85;line-height:1.5}
+
   /* Ventana con la imagen del cupón */
   #saveBox{
     position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;
@@ -397,6 +407,16 @@
   </div>
 </section>
 
+<!-- ============ REGALO EXPIRADO ============ -->
+<section class="screen" id="sExp" aria-label="Regalo expirado">
+  <div class="stars" data-stars="40"></div>
+  <div class="inner">
+    <div class="clock">⏰</div>
+    <h1>Este regalo expiró</h1>
+    <p>Llegaste un poquito tarde…<br>el tiempo para abrirlo ya terminó 🥀</p>
+  </div>
+</section>
+
 <div id="saveBox" hidden role="dialog" aria-label="Imagen del cupón">
   <div class="box">
     <img id="saveImg" alt="Cupón válido para el plan que tú quieras">
@@ -433,6 +453,12 @@
       box.appendChild(st);
     }
   });
+
+  /* ---------- fecha límite ----------
+     11 de noviembre de 2026, 2:00 p. m. (hora del celular de quien lo abre).
+     Para cambiarla: (año, mes-1, día, hora, minutos). Para quitarla: EXPIRA = null */
+  const EXPIRA = new Date(2026, 10, 11, 14, 0, 0);
+  if(EXPIRA && Date.now() >= EXPIRA.getTime()){ go("sExp"); return; }
 
   /* ---------- 1. píldoras ---------- */
   $("redPill").addEventListener("click", () => {
