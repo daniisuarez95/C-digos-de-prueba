@@ -7,7 +7,7 @@ Un pequeño juego de cumpleaños. Todo está en `index.html`: no hay que instala
 1. **Píldoras**: la azul abre el camino. La roja muestra un mensaje y luego desaparece.
 2. **Número 11**: un mensaje de cumpleaños y un acertijo. La respuesta es *Fernanda* (no importan las mayúsculas ni las tildes). Al acertar aparecen los números **11 · 20**.
 3. **Número 26**: un ramo de girasoles y un recuadro para escribir el código completo **11-11-20-26**.
-4. **Final**: la carta, el cupón para una cena romántica (se puede guardar como imagen), el mensaje de despedida y una lluvia de girasoles.
+4. **Final**: la carta, el cupón para el plan que ella quiera (se puede guardar como imagen), el mensaje de despedida y una lluvia de girasoles.
 
 ## Cómo obtener el link (GitHub Pages)
 

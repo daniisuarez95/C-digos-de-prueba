@@ -381,7 +381,8 @@
 
     <div class="coupon" id="coupon">
       <div class="tag">Cupón válido</div>
-      <h3>Válido para una cena romántica 🍷</h3>
+      <h3>Válido para el plan que tú quieras ✨</h3>
+      <p class="how"><b>Tú escoges:</b> una cena, una película, un paseo, una aventura… lo que se te antoje 💛</p>
       <p class="how">Canjéalo enviando esta imagen a la persona que te envió este programa.</p>
       <p class="code">11 · 11 · 20 · 26</p>
       <button class="btn dl" id="dlCoupon">Guardar imagen del cupón</button>
@@ -399,10 +400,10 @@
 
 <div id="saveBox" hidden role="dialog" aria-label="Imagen del cupón">
   <div class="box">
-    <img id="saveImg" alt="Cupón válido para una cena romántica">
+    <img id="saveImg" alt="Cupón válido para el plan que tú quieras">
     <p>En el celular, mantén presionada la imagen y elige <b>«Guardar en Fotos»</b>.<br>Luego envíasela a quien te mandó este programa 💌</p>
     <div class="row">
-      <a class="btn dl" id="saveLink" download="cupon-cena-romantica.png">Descargar</a>
+      <a class="btn dl" id="saveLink" download="cupon-plan-a-tu-eleccion.png">Descargar</a>
       <button class="btn" id="saveClose" type="button">Cerrar</button>
     </div>
   </div>
@@ -523,19 +524,21 @@
     x.beginPath(); x.arc(30,H/2,34,0,Math.PI*2); x.arc(W-30,H/2,34,0,Math.PI*2); x.fill();
     x.fillStyle = "#5b3a00"; x.textAlign = "center";
     x.font = '600 30px "Cinzel", serif'; x.fillText("C U P Ó N   V Á L I D O", W/2, 150);
-    x.font = '700 76px "Dancing Script", cursive'; x.fillText("Válido para una", W/2, 260);
-    x.fillText("cena romántica 🍷", W/2, 345);
-    x.font = 'italic 34px "Cormorant Garamond", serif';
-    x.fillText("Canjéalo enviando esta imagen a la persona", W/2, 430);
-    x.fillText("que te envió este programa.", W/2, 472);
-    x.font = '28px "Playfair Display", serif'; x.fillText("🌻  11 · 11 · 20 · 26  🌻", W/2, 550);
+    x.font = '700 72px "Dancing Script", cursive'; x.fillText("Válido para el plan", W/2, 240);
+    x.fillText("que tú quieras ✨", W/2, 320);
+    x.font = '600 italic 34px "Cormorant Garamond", serif';
+    x.fillText("Tú escoges: cena, película, paseo… lo que quieras 💛", W/2, 385);
+    x.font = 'italic 32px "Cormorant Garamond", serif';
+    x.fillText("Canjéalo enviando esta imagen a la persona", W/2, 445);
+    x.fillText("que te envió este programa.", W/2, 485);
+    x.font = '28px "Playfair Display", serif'; x.fillText("🌻  11 · 11 · 20 · 26  🌻", W/2, 552);
     const url = c.toDataURL("image/png");
     // iPhone / Android: abre el menú de compartir (Guardar en Fotos, WhatsApp...)
     try{
       const blob = await new Promise(r => c.toBlob(r, "image/png"));
-      const file = new File([blob], "cupon-cena-romantica.png", {type:"image/png"});
+      const file = new File([blob], "cupon-plan-a-tu-eleccion.png", {type:"image/png"});
       if(navigator.canShare && navigator.canShare({files:[file]})){
-        await navigator.share({files:[file], title:"Cupón: cena romántica"});
+        await navigator.share({files:[file], title:"Cupón: el plan que tú quieras"});
         return;
       }
     }catch(err){ if(err && err.name === "AbortError") return; }
